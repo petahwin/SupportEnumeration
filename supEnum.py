@@ -56,8 +56,11 @@ def printPair (set1, set2):
 def main ():
     items1 = ['a', 'b', 'c', 'd']
     items2 = ['e', 'f', 'g', 'h']
-    kSubsets(items1, items2, 4, printPair)
-    print (numPairs)
+    global numPairs
+    for i in range(1,5):
+        numPairs = 0
+        kSubsets(items1, items2, i, printPair)
+        print (numPairs)
 
 main()
 
