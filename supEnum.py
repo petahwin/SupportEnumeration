@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+import sys
+import argparse
+
 try:
     import numpy
 except:
@@ -53,14 +56,37 @@ def printPair (set1, set2):
     numPairs += 1
     print((set1,set2))
 
+def parseArgs():
+  parser = argparse.ArgumentParser()
+  parser.add_argument("gameFile", type=file)
+  args = parser.parse_args()
+  parseFile(args.gameFile)
+
+def parseFile (fObj):
+  for line in fObj:
+    line = line.strip()
+    if not line:
+      continue
+    else:
+      line = line.split()
+      if line[0][0].isdigit():
+	continue
+      elif line[0] == "Players:":
+	print "players = " + line[1]
+      elif line[0] == "Actions:":
+	print "actions = " + line[1] + ", " + line[2]
+      else:
+	continue
+
 def main ():
+    parseArgs()
     items1 = ['a', 'b', 'c', 'd']
     items2 = ['e', 'f', 'g', 'h']
     global numPairs
-    for i in range(1,5):
-        numPairs = 0
-        kSubsets(items1, items2, i, printPair)
-        print (numPairs)
+    # for i in range(1,5):
+    #     numPairs = 0
+    #     kSubsets(items1, items2, i, printPair)
+    #     print (numPairs)
 
 main()
 
