@@ -10,7 +10,6 @@ except:
 
 print "NumPy is installed: verion " + numpy.__version__
 
-
 # def kSubsetsHelper(k, items, acc, index):
 #     # (n-1 c k) + (n - 1 c k - 1) 
 #     if (len(items) - index) < k:
@@ -28,6 +27,13 @@ print "NumPy is installed: verion " + numpy.__version__
 #
 
 numPairs = 0 
+payOffTable = []
+items1, items2 = [], []
+payoffA, payoffB = lambda : 0, lambda : 0
+
+def nashEq(ac1, ac2):
+    matSize = 1 + len (ac1)
+    payoffB
 
 def kSubsetsHelper(k, kCur, items1, items2, acc1, acc2, index, proc, f):
     if proc:
@@ -60,9 +66,11 @@ def parseArgs():
   parser = argparse.ArgumentParser()
   parser.add_argument("gameFile", type=file)
   args = parser.parse_args()
-  parseFile(args.gameFile)
+  return parseFile(args.gameFile)
 
 def parseFile (fObj):
+  global payOffTable
+
   for line in fObj:
     line = line.strip()
     if not line:
@@ -70,18 +78,33 @@ def parseFile (fObj):
     else:
       line = line.split()
       if line[0][0].isdigit():
-	continue
+        for i in range(0, len(line), 2):
+            payOffTable.append((float(line[i]), float(line[i+1])))
       elif line[0] == "Players:":
 	print "players = " + line[1]
       elif line[0] == "Actions:":
 	print "actions = " + line[1] + ", " + line[2]
+        nAction1, nAction2 = int(line[1]), int(line[2])
       else:
 	continue
+  return nAction1, nAction2
+
+def buildLookupPayoff(nAction1, nAction2):
+   return (lambda row, col: payOffTable[row + col * nAction1])
 
 def main ():
-    parseArgs()
-    items1 = ['a', 'b', 'c', 'd']
-    items2 = ['e', 'f', 'g', 'h']
+    nAction1, nAction2 = parseArgs()
+    global lookupA, lookupB
+    lookup = buildLookupPayoff(nAction1, nAction2)
+    lookupA = lambda a,b: lookup (a,b)[0]
+    lookupB = lambda a,b: lookup (a,b)[1]
+
+    # items1 = ['a', 'b', 'c', 'd']
+    # items2 = ['e', 'f', 'g', 'h']
+    global items1, items2
+    items1 = range(0, nAction1)
+    items2 = range(0, nAction2)
+
     global numPairs
     # for i in range(1,5):
     #     numPairs = 0
