@@ -7,3 +7,4 @@ b = numpy.array([0,0,1])
 print numpy.linalg.lstsq(a,b)[0]
 
 
+
