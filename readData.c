@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+extern int nActions1, nActions2;
+extern float * payoffsA, * payoffsB;
+
 /* Returns 0 on error, 1 on success */
 /* In param: game file */
 /* Out param: nothing for now */
@@ -10,7 +13,7 @@ int readGame(char * gameData) {
   FILE * fp;
   char line[60];
   if (fp = fopen(gameData, "r")) {
-    int nActions1 = 1, nActions2 = 1;
+//    int nActions1 = 1, nActions2 = 1;
     float payoff1 = 0., payoff2 = 0.;
 
     /* Get no. actions for player 1 */
@@ -21,12 +24,15 @@ int readGame(char * gameData) {
     fgets(line, sizeof(line), fp);
     sscanf(line, "player2: %d", &nActions2);
 
-    printf("P1: %d, P2: %d\n", nActions1, nActions2);
+    payoffsA = malloc(nActions1 * nActions2 * sizeof(float));
+    payoffsB = malloc(nActions1 * nActions2 * sizeof(float));
 
+    int i = 0;
     /* Get all of the payoffs */
     while (fgets(line, sizeof(line), fp)) {
       sscanf(line, "%f %f", &payoff1, &payoff2);
-      printf("%f, %f\n", payoff1, payoff2);
+      payoffsA[i] = payoff1, payoffsB[i] = payoff2;
+      ++i;
     }
     return 1;
   } else {
@@ -34,6 +40,9 @@ int readGame(char * gameData) {
   }
 }
 
+
+
+/*
 int main(int argc, char * argv[]) {
   if (argc != 2) {
     fprintf(stderr, "Incorrect command line args");
@@ -43,4 +52,4 @@ int main(int argc, char * argv[]) {
     return 0;
   }
 }
-
+*/
