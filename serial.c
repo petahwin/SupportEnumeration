@@ -162,6 +162,7 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
     buildMat(acc1, acc2, suppSize, matA, true);
 
     if (0!=LAPACKE_sgesv(LAPACK_COL_MAJOR, numEqs, nrhs, matA, lda, ipiv, vecX, lda)) {
+        printf("No linear system solution\n");
         return;
     }
     // Check that prob distribution is all non-negative weights
