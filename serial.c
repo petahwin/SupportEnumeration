@@ -12,6 +12,7 @@ int nActions1, nActions2;
 float * payoffsA, * payoffsB;
 static int * allActions1, * allActions2;
 int globSum = 0;
+int stackCount = 0;
 
 int readGame(char * gameData);
 
@@ -54,6 +55,8 @@ float getPayoff(float * payoffs, int i, int j) {
 void kSubsetsHelper(int k, int kCur, int * acc1, int * acc2, int index, 
                     bool proc, void (*f)(int *, int *, int)) 
 {
+    ++stackCount;
+    // printf("stack count %d\n", stackCount);
     int * acc; 
     int * items; 
     int nActions = 0;
@@ -67,20 +70,20 @@ void kSubsetsHelper(int k, int kCur, int * acc1, int * acc2, int index,
         nActions = nActions1;
     }
 
-    if ((nActions - index) < kCur) {
-        return;
-    } else if (kCur == 0) {
+    if (kCur == 0) {
         if (proc) f(acc1, acc2, k);
-        else kSubsetsHelper(k, k, acc1, acc2, 0, !proc, f);
+        else kSubsetsHelper(k, k, acc1, acc2, 0, true, f);
+    } else if (nActions - index < kCur || index >= nActions ) {
+        return;
     } else {
         // printf("n1, n2 = %d, %d\n", nActions1, nActions2);
-        // printf("nActions: %d, index: %d, diff: %d, kCur: %d\n", nActions, index, 
-        //                                                         kCur + index, kCur);
+        // printf("nActions: %d, index: %d, sum: %d, diff: %d, kCur: %d\n", 
+        //            nActions, index, nActions + index, nActions - index, kCur);
         acc[k-kCur] = items[index];
-        kSubsetsHelper(k, kCur-1, acc1, acc2, index+1,proc,f);
-        kSubsetsHelper(k, kCur, acc1, acc2, index+1,proc,f);
+        kSubsetsHelper(k, kCur-1, acc1, acc2, index+1, proc, f);
+        kSubsetsHelper(k, kCur, acc1, acc2, index+1, proc, f);
     }
-
+    --stackCount;
     return;
 }
 
@@ -91,7 +94,7 @@ void kSubsets(int k, void (*f) (int *, int *, int)) {
     int acc1[k], acc2[k];
     
     for (int i = 0; i < k; ++i) {acc1[i] = 0; acc2[i] = 0;};
-    kSubsetsHelper(k, k, acc1, acc2, startIndex, startProc, f);
+    kSubsetsHelper(k, k, acc1, acc2, 0, startProc, f);
 }
 
 // Debug function to determine correctness of subset enumeration
@@ -242,16 +245,7 @@ int main(int argc, char * argv[]) {
         return 1;
     } else {
         readGame(argv[1]);
-//        printf("Main: P1: %d, P2: %d\n", nActions1, nActions2);
-      /* 
-        if(nActions1 == 5 && nActions2 == 5) {
-            printf("good\n");
-            return 0;
-        } else { 
-            printf("bad\n");
-            return 1;
-        }
-    */
+
         // Init set of all actions
         int allActs1[nActions1], allActs2[nActions2];
         for (int i = 0; i < nActions1; ++i) allActs1[i] = i;
@@ -260,7 +254,7 @@ int main(int argc, char * argv[]) {
 
         int maxSupport = MIN(nActions1, nActions2);
         for (int i = 1; i <= maxSupport; ++i) {
-            kSubsets(i, printPair);
+            kSubsets(i, nashEq);
         }
         
         free(payoffsA); free(payoffsB);

@@ -1,9 +1,12 @@
 #!/bin/bash
 
 cmdlineargs="$*"
+defaultargs=' -output GambitOutput -players 2'
+cmdlineargs+=$defaultargs
+echo $cmdlineargs
 
 # Generate the game
-java -jar gamut.jar $cmdlineargs
+java -jar gamut.jar $cmdlineargs 
 
 # Continue only if game was successfully generated
 if [ "$?" -eq 0 ]; then

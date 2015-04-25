@@ -124,10 +124,10 @@ def kSubsetsHelper(k, kCur, items1, items2, acc1, acc2, index, proc, f):
     else:
       kSubsetsHelper(k,k, items1, items2, acc1, [], 0, True, f)
   else:
-    kSubsetsHelper(k,kCur, items1, items2, acc1, acc2, index+1, proc,f)
     acc.append(items[index])
     kSubsetsHelper(k,kCur-1,items1,items2,acc1,acc2,index+1,proc,f)
     acc.pop()
+    kSubsetsHelper(k,kCur, items1, items2, acc1, acc2, index+1, proc,f)
 
 def kSubsets(items1, items2, k, f):
   kSubsetsHelper(k,k,items1,items2,[],[],0,False,f)
