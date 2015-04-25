@@ -1,7 +1,7 @@
 CUDAPATH = /home/apps/fas/GPU/cuda_6.0.37
 CC = icc
 NVCC = $(CUDAPATH)/bin/nvcc
-CFLAGS = -mkl -debug -g -O3 -xHost -fno-alias -std=c99 -profile-functions
+CFLAGS = -mkl -debug -g -O3 -xHost -fno-alias -std=c99 #-profile-functions 
 
 # NVCC Compiler-specific flags (phitest supports only 2.x capability)
 override NVCCFLAGS += -I$(CUDAPATH)/include -O3
