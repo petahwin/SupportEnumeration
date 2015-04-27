@@ -35,7 +35,6 @@ void kSubsetsRecHelper(int k, int kCur, int * acc1, int * acc2, int index,
 
 // Runs only for the side effects, I/O
 void kSubsetsRec(int k, void (*f) (int *, int *, int)) {
-    int startIndex = 0;
     bool startProc = false;
     int acc1[k], acc2[k];
     

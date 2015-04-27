@@ -12,7 +12,7 @@ extern float * payoffsA, * payoffsB;
 int readGame(char * gameData) {
   FILE * fp;
   char line[60];
-  if (fp = fopen(gameData, "r")) {
+  if ( (fp = fopen(gameData, "r")) ) {
 //    int nActions1 = 1, nActions2 = 1;
     float payoff1 = 0., payoff2 = 0.;
 
@@ -34,6 +34,7 @@ int readGame(char * gameData) {
       payoffsA[i] = payoff1, payoffsB[i] = payoff2;
       ++i;
     }
+    fclose(fp);
     return 1;
   } else {
     return 0;  

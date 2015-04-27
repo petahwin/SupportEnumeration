@@ -109,13 +109,14 @@ void buildFullStrat(int * ac, float * stratWeights, int sizeSubSet,
 
 void nashEq(int * acc1, int * acc2, int suppSize) {
     // printPair(acc1,acc2,suppSize);
+    // printf("Support size %d\n", suppSize);
     int matSize = suppSize+1;
     for (int i = 0, size = matSize * matSize; i < size; ++i) matA[i] = 0.;
     int nrhs = 1;
     int numEqs = matSize;
     int lda = numEqs;
     int ldb = lda;
-    lapack_int ipiv[3];
+    lapack_int ipiv[numEqs];
 
 
     float vecX[matSize], vecY[matSize];
@@ -129,13 +130,19 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
     // so that player 2 is indifferent towards 1's strategy
     buildMat(acc1, acc2, suppSize, matA, true);
 
-    if (0!=LAPACKE_sgesv(LAPACK_COL_MAJOR, 
+    int info = LAPACKE_sgesv(LAPACK_COL_MAJOR, 
                         (lapack_int)numEqs, 
                         (lapack_int)nrhs, 
                         matA, 
                         (lapack_int)lda, 
-                        ipiv, vecX, (lapack_int)ldb)) {
-        printf("No linear system solution\n");
+                        ipiv, vecX, (lapack_int)ldb); 
+    if (info > 0) {
+        printf("No linear system solution X\n");
+        // printf("Support size %d\n", suppSize);
+        // printPair(acc1,acc2,suppSize);
+        return;
+    } else if (info < 0) {
+        printf("sgesv param error\n");
         return;
     }
     // Check that prob distribution is all non-negative weights
@@ -149,15 +156,21 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
     // Get prob distribution for support in player 2's strategy
     // so that player 1 is indifferent towards 2's strategy
     buildMat(acc1, acc2, suppSize, matA, false);
-    if (0!=LAPACKE_sgesv(LAPACK_COL_MAJOR, 
+    info = LAPACKE_sgesv(LAPACK_COL_MAJOR, 
                         (lapack_int)numEqs, 
                         (lapack_int)nrhs, 
                         matA, 
                         (lapack_int)lda, 
-                        ipiv, vecY, (lapack_int)ldb)) {
-        printf("No linear system solution\n");
+                        ipiv, vecY, (lapack_int)ldb);
+
+    if (info > 0) {
+        printf("No linear system solution Y\n");
+        return;
+    } else if (info < 0) {
+        printf("sgesv param error\n");
         return;
     }
+
     // Check that prob distribution 
     // if (0!=LAPACKE_sgesv(LAPACK_COL_MAJOR, numEqs, nrhs, matA, lda, ipiv, vecY, lda)){
     //    printf("No linear system solution\n");

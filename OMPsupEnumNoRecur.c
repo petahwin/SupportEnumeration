@@ -127,7 +127,7 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
     int numEqs = matSize;
     int lda = numEqs;
     int ldb = lda;
-    int ipiv[3];
+    int ipiv[numEqs];
 
     float vecX[matSize], vecY[matSize];
     for (int i = 0; i < matSize; ++i) {
