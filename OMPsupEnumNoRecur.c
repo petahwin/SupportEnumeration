@@ -1,13 +1,19 @@
 #include <stdio.h>
+
 #include <mkl.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <math.h>
+#include <omp.h>
 #include "/home/fas/hpcprog/ahs3/cpsc424/utils/timing/timing.h"
 #define DIE(x) fprintf(stderr, x); exit(1)
 #define MIN(a,b) a < b ? a : b
 #define MAX(a,b) a > b ? a : b
 
+int tid;
+int numThreads;
+int threadCounter;
+#pragma omp threadprivate(threadCounter, tid)
 int nActions1, nActions2;
 float * payoffsA, * payoffsB;
 int * allActions1, * allActions2;
@@ -15,6 +21,24 @@ int globSum = 0;
 int stackCount = 0;
 
 int readGame(char * gameData);
+
+int kSubsetsItHelper(int * arr, int n, int k);
+void kSubsetsItOMP(int k, void (*f) (int *, int *, int)) {
+    int arr1[k], arr2[k];
+    for (int i = 0; i < k; ++i) arr1[i] = i, arr2[i] = i;
+    do {
+        do {
+            if (threadCounter % numThreads == tid) {
+                f(arr1, arr2, k);
+                threadCounter++;
+            } else {
+                // printf("Thread %d skipping...\n", tid);
+                threadCounter++;
+            }
+        } while (kSubsetsItHelper(arr2, nActions2, k));
+    } while (kSubsetsItHelper(arr1, nActions1, k));
+}
+
 
 void printVectorI(int * v, int size) {
     printf("[");
@@ -52,51 +76,6 @@ float getPayoff(float * payoffs, int i, int j) {
     }
 }
 
-void kSubsetsHelper(int k, int kCur, int * acc1, int * acc2, int index, 
-                    bool proc, void (*f)(int *, int *, int)) 
-{
-    ++stackCount;
-    // printf("stack count %d\n", stackCount);
-    int * acc; 
-    int * items; 
-    int nActions = 0;
-    if (proc) {
-        acc = acc2; 
-        items = allActions2; 
-        nActions = nActions2;
-    } else {
-        acc = acc1; 
-        items = allActions1; 
-        nActions = nActions1;
-    }
-
-    if (kCur == 0) {
-        if (proc) f(acc1, acc2, k);
-        else kSubsetsHelper(k, k, acc1, acc2, 0, true, f);
-    } else if (nActions - index < kCur || index >= nActions ) {
-        return;
-    } else {
-        // printf("n1, n2 = %d, %d\n", nActions1, nActions2);
-        // printf("nActions: %d, index: %d, sum: %d, diff: %d, kCur: %d\n", 
-        //            nActions, index, nActions + index, nActions - index, kCur);
-        acc[k-kCur] = items[index];
-        kSubsetsHelper(k, kCur-1, acc1, acc2, index+1, proc, f);
-        kSubsetsHelper(k, kCur, acc1, acc2, index+1, proc, f);
-    }
-    --stackCount;
-    return;
-}
-
-// Runs only for the side effects, I/O
-void kSubsets(int k, void (*f) (int *, int *, int)) {
-    int startIndex = 0;
-    bool startProc = false;
-    int acc1[k], acc2[k];
-    
-    for (int i = 0; i < k; ++i) {acc1[i] = 0; acc2[i] = 0;};
-    kSubsetsHelper(k, k, acc1, acc2, 0, startProc, f);
-}
-
 // Debug function to determine correctness of subset enumeration
 void printPair(int * acc1, int * acc2, int k) {
     printf("Acc1: ");
@@ -109,11 +88,6 @@ void printPair(int * acc1, int * acc2, int k) {
     }
     printf("\n");
     ++globSum;
-}
-
-// Debug function to determine correctness of subset enumeration
-void doNothing(int * acc1, int * acc2, int k) {
-    return;
 }
 
 void buildMat(int * acc1, int * acc2, int suppSize, float * mat, bool isB) {
@@ -147,7 +121,6 @@ void buildFullStrat(int * ac, float * stratWeights, int sizeSubSet,
 }
 
 void nashEq(int * acc1, int * acc2, int suppSize) {
-    // printPair(acc1,acc2,suppSize);
     int matSize = suppSize+1;
     float matA[matSize * matSize];
     int nrhs = 1;
@@ -247,12 +220,12 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
 }
 
 int main(int argc, char * argv[]) {
-    if (argc != 2) {
+    if (argc != 3) {
         fprintf(stderr, "Incorrect command line args\n");
         return 1;
     } else {
         readGame(argv[1]);
-
+        numThreads = atoi(argv[2]); // Set Number of threads
         // Init set of all actions
         int allActs1[nActions1], allActs2[nActions2];
         for (int i = 0; i < nActions1; ++i) allActs1[i] = i;
@@ -260,9 +233,14 @@ int main(int argc, char * argv[]) {
         allActions1 = allActs1, allActions2 = allActs2;
 
         int maxSupport = MIN(nActions1, nActions2);
-        for (int i = 1; i <= maxSupport; ++i) {
-            kSubsets(i, nashEq);
-            // kSubsets(i, nashEq);
+        omp_set_num_threads(numThreads);
+        // numThreads = 8; 
+        #pragma omp parallel shared(maxSupport)
+        {   
+            threadCounter = 0, tid = omp_get_thread_num();
+            for (int i = 1; i <= maxSupport; ++i) {
+                kSubsetsItOMP(i, nashEq);
+            }
         }
         
         free(payoffsA); free(payoffsB);

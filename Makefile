@@ -3,7 +3,14 @@ MAGMAPATH = /home/apps/fas/GPU/MAGMA/magma-1.6.1/
 
 CC = icc
 NVCC = $(CUDAPATH)/bin/nvcc
-CFLAGS = -mkl -g -O3 -xHost -fno-alias -std=c99 -openmp #-profile-functions 
+CFLAGS = -mkl -g -O0 -xHost -fno-alias -Wall -Werror -pedantic -std=c99 -openmp #-profile-functions 
+
+# CFLAGS = -L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread \
+# -g -O1 -xHost -fno-alias -std=c99 -openmp #-profile-functions 
+# CFLAGS = -fopenmp -m64 -I${MKLROOT}/include #-Wl --no-as-needed -L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread \
+-g -O3 -std=c99  #-profile-functions
+
+# LINKLINE =  -Wl --no-as-needed -L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm    
 
 MCFLAGS = -fPIC -openmp -L$(MAGMAPATH)/lib -lmagma -lcublas -lcudart -I$(MAGMAPATH)/include
 
@@ -15,11 +22,11 @@ LFLAGS = -L$(CUDAPATH)/lib64 -lcuda -lcudart -lm
 GENCODE_SM20 = -gencode=arch=compute_20,code=\"sm_20,compute_20\"
 GENCODE = $(GENCODE_SM20)
 
-SerialsupEnum: SerialsupEnum.o readData.o\
+SerialsupEnum: SerialsupEnumNew.o readData.o subsets.o\
 /home/fas/hpcprog/ahs3/cpsc424/utils/timing/timing.o
-	$(CC) -o $@ $(CFLAGS) $^
+	$(CC) -o $@ $(CFLAGS) $^ -lm
 
-OMPsupEnum: OMPsupEnum.o readData.o\
+OMPsupEnum: OMPsupEnumNoRecur.o readData.o subsets.o\
 /home/fas/hpcprog/ahs3/cpsc424/utils/timing/timing.o
 	$(CC) -o $@ $(CFLAGS) $^
 
@@ -36,7 +43,7 @@ MagmasupEnum.o : MagmasupEnum.c
 	$(NVCC) $(GENCODE) $(NVCCFLAGS) -o $@ -c $<
 
 %.o : %.c
-	$(CC) $(CFLAGS) -c $<
+	$(CC) $(CFLAGS) -c $< -lm
 
 clean:
 	rm -f *.o serial GPUpairs SerialsupEnum OMPsupEnum

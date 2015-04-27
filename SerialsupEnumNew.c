@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <mkl.h>
+#include <mkl_lapacke.h>
+#include <mkl_blas.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <math.h>
@@ -13,6 +15,7 @@ float * payoffsA, * payoffsB;
 int * allActions1, * allActions2;
 int globSum = 0;
 int stackCount = 0;
+float * matA;
 
 int readGame(char * gameData);
 
@@ -107,12 +110,13 @@ void buildFullStrat(int * ac, float * stratWeights, int sizeSubSet,
 void nashEq(int * acc1, int * acc2, int suppSize) {
     // printPair(acc1,acc2,suppSize);
     int matSize = suppSize+1;
-    float matA[matSize * matSize];
+    for (int i = 0, size = matSize * matSize; i < size; ++i) matA[i] = 0.;
     int nrhs = 1;
     int numEqs = matSize;
     int lda = numEqs;
     int ldb = lda;
-    int ipiv[3];
+    lapack_int ipiv[3];
+
 
     float vecX[matSize], vecY[matSize];
     for (int i = 0; i < matSize; ++i) {
@@ -125,7 +129,12 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
     // so that player 2 is indifferent towards 1's strategy
     buildMat(acc1, acc2, suppSize, matA, true);
 
-    if (0!=LAPACKE_sgesv(LAPACK_COL_MAJOR, numEqs, nrhs, matA, lda, ipiv, vecX, lda)) {
+    if (0!=LAPACKE_sgesv(LAPACK_COL_MAJOR, 
+                        (lapack_int)numEqs, 
+                        (lapack_int)nrhs, 
+                        matA, 
+                        (lapack_int)lda, 
+                        ipiv, vecX, (lapack_int)ldb)) {
         printf("No linear system solution\n");
         return;
     }
@@ -136,13 +145,24 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
             return;
         }
     }
-    
+   
     // Get prob distribution for support in player 2's strategy
     // so that player 1 is indifferent towards 2's strategy
     buildMat(acc1, acc2, suppSize, matA, false);
-    if (0!=LAPACKE_sgesv(LAPACK_COL_MAJOR, numEqs, nrhs, matA, lda, ipiv, vecY, lda)){
+    if (0!=LAPACKE_sgesv(LAPACK_COL_MAJOR, 
+                        (lapack_int)numEqs, 
+                        (lapack_int)nrhs, 
+                        matA, 
+                        (lapack_int)lda, 
+                        ipiv, vecY, (lapack_int)ldb)) {
+        printf("No linear system solution\n");
         return;
     }
+    // Check that prob distribution 
+    // if (0!=LAPACKE_sgesv(LAPACK_COL_MAJOR, numEqs, nrhs, matA, lda, ipiv, vecY, lda)){
+    //    printf("No linear system solution\n");
+    //    return;
+    // }
     // Check that prob distribution is all non-negative weights
     for (int i = 0; i < suppSize; ++i) {
         if (vecY[i] < 0.) {
@@ -150,6 +170,7 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
             return;
         }
     }
+
     float strat1[nActions1], strat2[nActions2];
     buildFullStrat(acc1, vecX, suppSize, nActions1, strat1); 
     buildFullStrat(acc2, vecY, suppSize, nActions2, strat2); 
@@ -218,12 +239,13 @@ int main(int argc, char * argv[]) {
         allActions1 = allActs1, allActions2 = allActs2;
 
         int maxSupport = MIN(nActions1, nActions2);
+        matA = malloc((maxSupport + 1) * (maxSupport + 1) * sizeof(float));
+
         for (int i = 1; i <= maxSupport; ++i) {
-            kSubsetsIt(i, doNothing);
-            // kSubsets(i, nashEq);
+            kSubsetsIt(i, nashEq);
         }
         
-        free(payoffsA); free(payoffsB);
+        free(payoffsA); free(payoffsB); free(matA);
         return 0;
     }
 }
