@@ -6,6 +6,11 @@
 #include <math.h>
 #include <omp.h>
 #include "/home/fas/hpcprog/ahs3/cpsc424/utils/timing/timing.h"
+
+#ifndef INCLUDED_PRINTUTILS_H
+#include "printUtils.h"
+#endif
+
 #define DIE(x) fprintf(stderr, x); exit(1)
 #define MIN(a,b) a < b ? a : b
 #define MAX(a,b) a > b ? a : b
@@ -16,35 +21,25 @@ int threadCounter;
 #pragma omp threadprivate(threadCounter, tid)
 int nActions1, nActions2;
 float * payoffsA, * payoffsB;
-static int * allActions1, * allActions2;
-int globSum = 0;
-int stackCount = 0;
+int * allActions1, * allActions2;
 
 int readGame(char * gameData);
 
-void printVectorI(int * v, int size) {
-    printf("[");
-    for (int i=0; i<size; ++i) printf("%d ", v[i]);
-    printf("]\n");
-}
-
-void printVectorF(float * v, int size) {
-    printf("[");
-    for (int i=0; i<size; ++i) printf("%.5f ", v[i]);
-    printf("]\n");
-}
-
-// Print matrix; matrix in column maj order
-void printMatrix(float * mat, int rows, int cols) {
-    printf("[\n");
-    for (int i = 0; i < rows; ++i) {
-        printf("\t[ ");
-        for (int j = 0; j < cols; ++j) {
-            printf("%f ", mat[j*rows + i]); 
-        }
-        printf("],\n");
-    }
-    printf(" ]\n");
+int kSubsetsItHelper(int * arr, int n, int k);
+void kSubsetsItOMP(int k, void (*f) (int *, int *, int)) {
+    int arr1[k], arr2[k];
+    for (int i = 0; i < k; ++i) arr1[i] = i, arr2[i] = i;
+    do {
+        do {
+            if (threadCounter % numThreads == tid) {
+                f(arr1, arr2, k);
+                threadCounter++;
+            } else {
+                // printf("Thread %d skipping...\n", tid);
+                threadCounter++;
+            }
+        } while (kSubsetsItHelper(arr2, nActions2, k));
+    } while (kSubsetsItHelper(arr1, nActions1, k));
 }
 
 // Given payoff table and index, returns val at that index or errors out
@@ -56,69 +51,6 @@ float getPayoff(float * payoffs, int i, int j) {
     } else {
         return payoffs[j * nActions1 + i];
     }
-}
-
-void kSubsetsHelper(int k, int kCur, int * acc1, int * acc2, int index, 
-                    bool proc, void (*f)(int *, int *, int)) 
-{
-    ++stackCount;
-    int * acc; 
-    int * items; 
-    int nActions = 0;
-    if (proc) {
-        acc = acc2; 
-        items = allActions2; 
-        nActions = nActions2;
-    } else {
-        acc = acc1; 
-        items = allActions1; 
-        nActions = nActions1;
-    }
-
-    if (kCur == 0) {
-        if (proc) {
-            if (threadCounter % numThreads == tid) {
-                threadCounter = threadCounter + 1;
-                f(acc1, acc2, k);
-            } else {
-                threadCounter = threadCounter + 1;
-                return; // Skip this iteration
-            }
-        }
-        else kSubsetsHelper(k, k, acc1, acc2, 0, true, f);
-    } else if (nActions - index < kCur || index >= nActions ) {
-        return;
-    } else {
-        acc[k-kCur] = items[index];
-        kSubsetsHelper(k, kCur-1, acc1, acc2, index+1, proc, f);
-        kSubsetsHelper(k, kCur, acc1, acc2, index+1, proc, f);
-    }
-    --stackCount;
-    return;
-}
-
-// Runs only for the side effects, I/O
-void kSubsets(int k, void (*f) (int *, int *, int)) {
-    int startIndex = 0;
-    bool startProc = false;
-    int acc1[k], acc2[k];
-    
-    for (int i = 0; i < k; ++i) {acc1[i] = 0; acc2[i] = 0;};
-    kSubsetsHelper(k, k, acc1, acc2, 0, startProc, f);
-}
-
-// Debug function to determine correctness of subset enumeration
-void printPair(int * acc1, int * acc2, int k) {
-    printf("Acc1: ");
-    for (int i = 0; i < k; ++i) {
-        printf("%d ", acc1[i]); 
-    }
-    printf("Acc2: ");
-    for (int i = 0; i < k; ++i) {
-        printf("%d ", acc2[i]); 
-    }
-    printf("\n");
-    ++globSum;
 }
 
 void buildMat(int * acc1, int * acc2, int suppSize, float * mat, bool isB) {
@@ -158,7 +90,7 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
     int numEqs = matSize;
     int lda = numEqs;
     int ldb = lda;
-    int ipiv[3];
+    int ipiv[numEqs];
 
     float vecX[matSize], vecY[matSize];
     for (int i = 0; i < matSize; ++i) {
@@ -270,7 +202,7 @@ int main(int argc, char * argv[]) {
         {   
             threadCounter = 0, tid = omp_get_thread_num();
             for (int i = 1; i <= maxSupport; ++i) {
-                kSubsets(i, nashEq);
+                kSubsetsItOMP(i, nashEq);
             }
         }
         

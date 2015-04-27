@@ -1,9 +1,16 @@
 #include <stdio.h>
 #include <mkl.h>
+#include <mkl_lapacke.h>
+#include <mkl_blas.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <math.h>
 #include "/home/fas/hpcprog/ahs3/cpsc424/utils/timing/timing.h"
+
+#ifndef INCLUDED_PRINTUTILS_H
+#include "printUtils.h"
+#endif
+
 #define DIE(x) fprintf(stderr, x); exit(1)
 #define MIN(a,b) a < b ? a : b
 #define MAX(a,b) a > b ? a : b
@@ -11,35 +18,12 @@
 int nActions1, nActions2;
 float * payoffsA, * payoffsB;
 int * allActions1, * allActions2;
-int globSum = 0;
-int stackCount = 0;
+float * matA;
 
 int readGame(char * gameData);
 
-void printVectorI(int * v, int size) {
-    printf("[");
-    for (int i=0; i<size; ++i) printf("%d ", v[i]);
-    printf("]\n");
-}
-
-void printVectorF(float * v, int size) {
-    printf("[");
-    for (int i=0; i<size; ++i) printf("%.5f ", v[i]);
-    printf("]\n");
-}
-
-// Print matrix; matrix in column maj order
-void printMatrix(float * mat, int rows, int cols) {
-    printf("[\n");
-    for (int i = 0; i < rows; ++i) {
-        printf("\t[ ");
-        for (int j = 0; j < cols; ++j) {
-            printf("%f ", mat[j*rows + i]); 
-        }
-        printf("],\n");
-    }
-    printf(" ]\n");
-}
+void kSubsetsRec(int k, void (*f) (int *, int *, int));
+void kSubsetsIt(int k, void (*f) (int *, int *, int));
 
 // Given payoff table and index, returns val at that index or errors out
 // Column major ordering
@@ -52,65 +36,6 @@ float getPayoff(float * payoffs, int i, int j) {
     }
 }
 
-void kSubsetsHelper(int k, int kCur, int * acc1, int * acc2, int index, 
-                    bool proc, void (*f)(int *, int *, int)) 
-{
-    ++stackCount;
-    // printf("stack count %d\n", stackCount);
-    int * acc; 
-    int * items; 
-    int nActions = 0;
-    if (proc) {
-        acc = acc2; 
-        items = allActions2; 
-        nActions = nActions2;
-    } else {
-        acc = acc1; 
-        items = allActions1; 
-        nActions = nActions1;
-    }
-
-    if (kCur == 0) {
-        if (proc) f(acc1, acc2, k);
-        else kSubsetsHelper(k, k, acc1, acc2, 0, true, f);
-    } else if (nActions - index < kCur || index >= nActions ) {
-        return;
-    } else {
-        // printf("n1, n2 = %d, %d\n", nActions1, nActions2);
-        // printf("nActions: %d, index: %d, sum: %d, diff: %d, kCur: %d\n", 
-        //            nActions, index, nActions + index, nActions - index, kCur);
-        acc[k-kCur] = items[index];
-        kSubsetsHelper(k, kCur-1, acc1, acc2, index+1, proc, f);
-        kSubsetsHelper(k, kCur, acc1, acc2, index+1, proc, f);
-    }
-    --stackCount;
-    return;
-}
-
-// Runs only for the side effects, I/O
-void kSubsets(int k, void (*f) (int *, int *, int)) {
-    int startIndex = 0;
-    bool startProc = false;
-    int acc1[k], acc2[k];
-    
-    for (int i = 0; i < k; ++i) {acc1[i] = 0; acc2[i] = 0;};
-    kSubsetsHelper(k, k, acc1, acc2, 0, startProc, f);
-}
-
-// Debug function to determine correctness of subset enumeration
-void printPair(int * acc1, int * acc2, int k) {
-    printf("Acc1: ");
-    for (int i = 0; i < k; ++i) {
-        printf("%d ", acc1[i]); 
-    }
-    printf("Acc2: ");
-    for (int i = 0; i < k; ++i) {
-        printf("%d ", acc2[i]); 
-    }
-    printf("\n");
-    ++globSum;
-}
-
 // Debug function to determine correctness of subset enumeration
 void doNothing(int * acc1, int * acc2, int k) {
     return;
@@ -118,7 +43,6 @@ void doNothing(int * acc1, int * acc2, int k) {
 
 void buildMat(int * acc1, int * acc2, int suppSize, float * mat, bool isB) {
     // both payoffsA and payoffsB are col major
-    //
     int k = 0;
     if (isB) {
         for (int i = 0; i < suppSize; ++i) {
@@ -147,14 +71,14 @@ void buildFullStrat(int * ac, float * stratWeights, int sizeSubSet,
 }
 
 void nashEq(int * acc1, int * acc2, int suppSize) {
-    // printPair(acc1,acc2,suppSize);
     int matSize = suppSize+1;
-    float matA[matSize * matSize];
+    for (int i = 0, size = matSize * matSize; i < size; ++i) matA[i] = 0.;
     int nrhs = 1;
     int numEqs = matSize;
     int lda = numEqs;
     int ldb = lda;
-    int ipiv[3];
+    lapack_int ipiv[numEqs];
+
 
     float vecX[matSize], vecY[matSize];
     for (int i = 0; i < matSize; ++i) {
@@ -167,8 +91,17 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
     // so that player 2 is indifferent towards 1's strategy
     buildMat(acc1, acc2, suppSize, matA, true);
 
-    if (0!=LAPACKE_sgesv(LAPACK_COL_MAJOR, numEqs, nrhs, matA, lda, ipiv, vecX, lda)) {
-        printf("No linear system solution\n");
+    int info = LAPACKE_sgesv(LAPACK_COL_MAJOR, 
+                        (lapack_int)numEqs, 
+                        (lapack_int)nrhs, 
+                        matA, 
+                        (lapack_int)lda, 
+                        ipiv, vecX, (lapack_int)ldb); 
+    if (info > 0) {
+        printf("No linear system solution X\n");
+        return;
+    } else if (info < 0) {
+        printf("sgesv param error\n");
         return;
     }
     // Check that prob distribution is all non-negative weights
@@ -178,13 +111,25 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
             return;
         }
     }
-    
+   
     // Get prob distribution for support in player 2's strategy
     // so that player 1 is indifferent towards 2's strategy
     buildMat(acc1, acc2, suppSize, matA, false);
-    if (0!=LAPACKE_sgesv(LAPACK_COL_MAJOR, numEqs, nrhs, matA, lda, ipiv, vecY, lda)){
+    info = LAPACKE_sgesv(LAPACK_COL_MAJOR, 
+                        (lapack_int)numEqs, 
+                        (lapack_int)nrhs, 
+                        matA, 
+                        (lapack_int)lda, 
+                        ipiv, vecY, (lapack_int)ldb);
+
+    if (info > 0) {
+        printf("No linear system solution Y\n");
+        return;
+    } else if (info < 0) {
+        printf("sgesv param error\n");
         return;
     }
+
     // Check that prob distribution is all non-negative weights
     for (int i = 0; i < suppSize; ++i) {
         if (vecY[i] < 0.) {
@@ -192,6 +137,7 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
             return;
         }
     }
+
     float strat1[nActions1], strat2[nActions2];
     buildFullStrat(acc1, vecX, suppSize, nActions1, strat1); 
     buildFullStrat(acc2, vecY, suppSize, nActions2, strat2); 
@@ -260,12 +206,13 @@ int main(int argc, char * argv[]) {
         allActions1 = allActs1, allActions2 = allActs2;
 
         int maxSupport = MIN(nActions1, nActions2);
+        matA = malloc((maxSupport + 1) * (maxSupport + 1) * sizeof(float));
+
         for (int i = 1; i <= maxSupport; ++i) {
-            kSubsets(i, nashEq);
-            // kSubsets(i, nashEq);
+            kSubsetsIt(i, nashEq);
         }
         
-        free(payoffsA); free(payoffsB);
+        free(payoffsA); free(payoffsB); free(matA);
         return 0;
     }
 }
