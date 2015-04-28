@@ -38,3 +38,15 @@ void printPair(int * acc1, int * acc2, int k) {
     printf("\n");
 }
 
+void printSolution(float * strat1, float * strat2, int n1, int n2) {
+    printf("SOLUTION: ");
+    for (int i = 0; i < n1; ++i) {
+        printf("%f ", strat1[i]);
+    }
+    printf("| ");
+    for (int i = 0; i < n2; ++i) {
+        printf("%f ", strat2[i]);
+    }
+    printf("\n");
+}
+

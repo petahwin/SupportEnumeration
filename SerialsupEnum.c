@@ -98,10 +98,10 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
                         (lapack_int)lda, 
                         ipiv, vecX, (lapack_int)ldb); 
     if (info > 0) {
-        printf("No linear system solution X\n");
+        // printf("No linear system solution X\n");
         return;
     } else if (info < 0) {
-        printf("sgesv param error\n");
+        // printf("sgesv param error\n");
         return;
     }
     // Check that prob distribution is all non-negative weights
@@ -123,10 +123,10 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
                         ipiv, vecY, (lapack_int)ldb);
 
     if (info > 0) {
-        printf("No linear system solution Y\n");
+        // printf("No linear system solution Y\n");
         return;
     } else if (info < 0) {
-        printf("sgesv param error\n");
+        // printf("sgesv param error\n");
         return;
     }
 
@@ -180,16 +180,9 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
             return;
         }
     }
-    
-    printf("SOLUTION: ");
-    for (int i = 0; i < nActions1; ++i) {
-        printf("%f ", strat1[i]);
-    }
-    printf("| ");
-    for (int i = 0; i < nActions2; ++i) {
-        printf("%f ", strat2[i]);
-    }
-    printf("\n");
+  
+    // Print the strategy profiles 
+    // printSolution(strat1, strat2, nActions1, nActions2); 
 }
 
 int main(int argc, char * argv[]) {
@@ -198,7 +191,8 @@ int main(int argc, char * argv[]) {
         return 1;
     } else {
         readGame(argv[1]);
-
+        double wt1, wt2, ct1, ct2;
+        timing(&wt1, &ct1);
         // Init set of all actions
         int allActs1[nActions1], allActs2[nActions2];
         for (int i = 0; i < nActions1; ++i) allActs1[i] = i;
@@ -213,6 +207,9 @@ int main(int argc, char * argv[]) {
         }
         
         free(payoffsA); free(payoffsB); free(matA);
+        timing(&wt2, &ct2);
+        printf("%.5f\n", wt2 - wt1);
+        
         return 0;
     }
 }

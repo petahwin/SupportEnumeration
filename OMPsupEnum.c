@@ -104,7 +104,7 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
     buildMat(acc1, acc2, suppSize, matA, true);
 
     if (0!=LAPACKE_sgesv(LAPACK_COL_MAJOR, numEqs, nrhs, matA, lda, ipiv, vecX, lda)) {
-        printf("No linear system solution\n");
+        // printf("No linear system solution\n");
         return;
     }
     // Check that prob distribution is all non-negative weights
@@ -171,15 +171,7 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
         }
     }
     
-    printf("SOLUTION: ");
-    for (int i = 0; i < nActions1; ++i) {
-        printf("%f ", strat1[i]);
-    }
-    printf("| ");
-    for (int i = 0; i < nActions2; ++i) {
-        printf("%f ", strat2[i]);
-    }
-    printf("\n");
+    // printSolution(strat1, strat2, nActions1, nActions2); 
 }
 
 int main(int argc, char * argv[]) {
@@ -189,6 +181,8 @@ int main(int argc, char * argv[]) {
     } else {
         readGame(argv[1]);
         numThreads = atoi(argv[2]); // Set Number of threads
+        double wt1, wt2, ct1, ct2;
+        timing(&wt1, &ct1);
         // Init set of all actions
         int allActs1[nActions1], allActs2[nActions2];
         for (int i = 0; i < nActions1; ++i) allActs1[i] = i;
@@ -207,6 +201,8 @@ int main(int argc, char * argv[]) {
         }
         
         free(payoffsA); free(payoffsB);
+        timing(&wt2, &ct2);
+        printf("%.5f\n", wt2 - wt1);
         return 0;
     }
 }
