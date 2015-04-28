@@ -1,0 +1,41 @@
+Tue Apr 28 00:39:08 EDT 2015: start benchmarking for SerialsupEnum using games in file testFiles.txt
+RandomGame10.game.easy:
+Trial 1: 0.62291
+Trial 2: 0.41606
+RandomGame11.game.easy:
+Trial 1: 1.56896
+Trial 2: 1.56653
+RandomGame12.game.easy:
+Trial 1: 6.76277
+Trial 2: 6.70485
+RandomGame13.game.easy:
+Trial 1: 27.89271
+Trial 2: 28.60080
+RandomGame14.game.easy:
+Trial 1: 110.21238
+Trial 2: 111.52115
+RandomGame15.game.easy:
+Trial 1: 453.26206
+Trial 2: 463.36452
+RandomGame16.game.easy:
+Tue Apr 28 01:20:28 EDT 2015: start benchmarking for SerialsupEnum using games in file testFiles.txt
+RandomGame10.game.easy:
+Trial 1: 0.41500
+Trial 2: 0.40440
+RandomGame11.game.easy:
+Trial 1: 1.61395
+Trial 2: 1.56812
+RandomGame12.game.easy:
+Trial 1: 6.64599
+Trial 2: 6.63786
+RandomGame13.game.easy:
+Trial 1: 28.04854
+Trial 2: 27.77387
+RandomGame14.game.easy:
+Trial 1: 110.11545
+Trial 2: 113.11080
+RandomGame15.game.easy:
+Trial 1: 1907.26501
+Trial 1: 461.91440
+Trial 2: 467.53579
+RandomGame16.game.easy:
