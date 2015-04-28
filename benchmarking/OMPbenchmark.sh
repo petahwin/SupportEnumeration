@@ -18,9 +18,9 @@ log () {
     echo $1 >> $LOGFILE
 }
 
-echo $(date)": start benchmarking for OMPsupEnum using games in file $TESTFILES"
+echo "$(date): start benchmarking for OMPsupEnum using games in file $TESTFILES"
 
-log $(date)": start benchmarking for OMPsupEnum using games in file $TESTFILES"
+log "$(date): start benchmarking for OMPsupEnum using games in file $TESTFILES"
 for test_file in `cat $TESTFILES`; do      # Exec trials for each test file
     log "$test_file: "
     for threads in 2 4 8 16; do

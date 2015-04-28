@@ -18,6 +18,8 @@ RandomGame15.game.easy:
 Trial 1: 453.26206
 Trial 2: 463.36452
 RandomGame16.game.easy:
+Trial 1: 1907.26501
+Trial 2: 1899.09002
 Tue Apr 28 01:20:28 EDT 2015: start benchmarking for SerialsupEnum using games in file testFiles.txt
 RandomGame10.game.easy:
 Trial 1: 0.41500
@@ -35,7 +37,8 @@ RandomGame14.game.easy:
 Trial 1: 110.11545
 Trial 2: 113.11080
 RandomGame15.game.easy:
-Trial 1: 1907.26501
 Trial 1: 461.91440
 Trial 2: 467.53579
 RandomGame16.game.easy:
+Trial 1: 1939.60966
+Trial 2: 1886.09475

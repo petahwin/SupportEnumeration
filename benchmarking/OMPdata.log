@@ -89,3 +89,96 @@ Trial 1: 252.60646
 Trial 2: 238.04591
 For 16 threads:
 Trial 1: 128.25201
+Trial 2: 131.81920
+Tue
+RandomGame10.game.easy:
+For 2 threads:
+Trial 1: 0.24800
+Trial 2: 0.22220
+For 4 threads:
+Trial 1: 0.12075
+Trial 2: 0.11906
+For 8 threads:
+Trial 1: 0.06692
+Trial 2: 0.06661
+For 16 threads:
+Trial 1: 0.11791
+Trial 2: 0.04699
+RandomGame11.game.easy:
+For 2 threads:
+Trial 1: 0.86202
+Trial 2: 0.87143
+For 4 threads:
+Trial 1: 0.45860
+Trial 2: 0.43243
+For 8 threads:
+Trial 1: 0.22763
+Trial 2: 0.23456
+For 16 threads:
+Trial 1: 0.14911
+Trial 2: 0.13395
+RandomGame12.game.easy:
+For 2 threads:
+Trial 1: 3.64272
+Trial 2: 3.52917
+For 4 threads:
+Trial 1: 1.87329
+Trial 2: 1.83003
+For 8 threads:
+Trial 1: 0.89870
+Trial 2: 0.95384
+For 16 threads:
+Trial 1: 0.62646
+Trial 2: 0.54968
+RandomGame13.game.easy:
+For 2 threads:
+Trial 1: 15.25212
+Trial 2: 15.04556
+For 4 threads:
+Trial 1: 7.43943
+Trial 2: 7.43240
+For 8 threads:
+Trial 1: 3.99358
+Trial 2: 4.00603
+For 16 threads:
+Trial 1: 2.14150
+Trial 2: 2.07400
+RandomGame14.game.easy:
+For 2 threads:
+Trial 1: 63.59585
+Trial 2: 61.41887
+For 4 threads:
+Trial 1: 28.26149
+Trial 2: 29.49339
+For 8 threads:
+Trial 1: 15.07957
+Trial 2: 15.26539
+For 16 threads:
+Trial 1: 8.29295
+Trial 2: 7.62011
+RandomGame15.game.easy:
+For 2 threads:
+Trial 1: 234.79555
+Trial 2: 234.98470
+For 4 threads:
+Trial 1: 116.06817
+Trial 2: 119.37016
+For 8 threads:
+Trial 1: 62.41593
+Trial 2: 61.40761
+For 16 threads:
+Trial 1: 31.26429
+Trial 2: 32.96339
+RandomGame16.game.easy:
+For 2 threads:
+Trial 1: 971.53129
+Trial 2: 949.81543
+For 4 threads:
+Trial 1: 486.57922
+Trial 2: 485.97939
+For 8 threads:
+Trial 1: 252.85112
+Trial 2: 252.61399
+For 16 threads:
+Trial 1: 128.07906
+Trial 2: 128.52558
