@@ -67,6 +67,31 @@ int kSubsetsItHelper(int * arr, int n, int k) {
     return changed;
 }
 
+int kSubsetsChrItHelper(char * arr, int n, int k) {
+    int finished = 0;
+    int changed = 0;
+    if (k > 0) {
+        for (int i = k - 1; !finished && !changed; --i) {
+            if (arr[i] < (n-1) - (k-1) + i) {
+                ++arr[i];
+                if (i < k - 1) {
+                    for (int j = i + 1; j < k; ++j) {
+                        arr[j] = arr[j-1] + 1;
+                    }
+                }
+                changed = 1;
+            }
+            finished = i == 0;
+        }
+        if (!changed) {
+            for (int i = 0; i < k; ++i) {
+                arr[i] = i;
+            }
+        }
+    }
+    return changed;
+}
+
 void kSubsetsIt(int k, void (*f) (int *, int *, int)) {
     int arr1[k], arr2[k];
     for (int i = 0; i < k; ++i) arr1[i] = i, arr2[i] = i;
