@@ -171,7 +171,7 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
         }
     }
     
-    // printSolution(strat1, strat2, nActions1, nActions2); 
+    printSolution(strat1, strat2, nActions1, nActions2); 
 }
 
 int main(int argc, char * argv[]) {

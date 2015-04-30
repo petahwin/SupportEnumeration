@@ -32,7 +32,7 @@ def main():
 
     for i in range (1, n + 1):
         numSupports = misc.comb(n, i)
-        numThreads = numSupports**2 # assuming that each thread handles one pair
+        numThreads = numSupports*512 # assuming that each thread handles one pair
         
         memSupports = numSupports * i * sizeFloat
         memThreads = memThread(n, i) * numThreads

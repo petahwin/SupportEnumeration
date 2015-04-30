@@ -1,4 +1,4 @@
-CUDAPATH = /home/apps/fas/GPU/cuda_6.5.14
+CUDAPATH = /home/apps/fas/GPU/cuda_6.0.37
 MAGMAPATH = /home/apps/fas/GPU/MAGMA/magma-1.6.1/
 
 CC = icc
@@ -17,11 +17,9 @@ LFLAGS_SERIAL_GCC = -Wl,--no-as-needed -L${MKLROOT}/lib/intel64 -lmkl_intel_lp64
 
 # LINKLINE =  -Wl --no-as-needed -L${MKLROOT}/lib/intel64 -lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm    
 
-MCFLAGS = -fPIC -openmp -L$(MAGMAPATH)/lib -lmagma -lcublas -lcudart -I$(MAGMAPATH)/include
-
 # NVCC Compiler-specific flags (phitest supports only 2.x capability)
 # override NVCCFLAGS += -I$(CUDAPATH)/include -O3
-NVCCFLAGS = -I$(CUDAPATH)/include -O3
+NVCCFLAGS = -I$(CUDAPATH)/include -O3 -rdc=true 
 
 LFLAGS = -L$(CUDAPATH)/lib64 -lcuda -lcudart -lm
 GENCODE_SM20 = -gencode=arch=compute_20,code=\"sm_20,compute_20\"
@@ -40,7 +38,7 @@ OMPsupEnum: OMPsupEnum.o readData.o subsets.o printUtils.o \
 MagmasupEnum: MagmasupEnum.o
 	$(CC) -o $@ $(MCFLAGS) $^
 
-GPUsupEnum: GPUsupEnum.o
+GPUsupEnum: GPUsupEnum.o 
 	$(NVCC) $(GENCODE) $(LFLAGS) -o $@ $<
 
 MagmasupEnum.o : MagmasupEnum.c
@@ -48,6 +46,9 @@ MagmasupEnum.o : MagmasupEnum.c
 
 %.o : %.cu
 	$(NVCC) $(GENCODE) $(NVCCFLAGS) -o $@ -c $<
+
+%Cu.o : %.c
+	gcc -O3 -std=c99 -o $@ -c $<
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< -lm

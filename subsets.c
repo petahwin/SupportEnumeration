@@ -38,19 +38,21 @@ void kSubsetsRec(int k, void (*f) (int *, int *, int)) {
     bool startProc = false;
     int acc1[k], acc2[k];
     
-    for (int i = 0; i < k; ++i) {acc1[i] = 0; acc2[i] = 0;};
+    int i; 
+    for (i = 0; i < k; ++i) {acc1[i] = 0; acc2[i] = 0;};
     kSubsetsRecHelper(k, k, acc1, acc2, 0, startProc, f);
 }
 
 int kSubsetsItHelper(int * arr, int n, int k) {
     int finished = 0;
     int changed = 0;
+    int i, j;
     if (k > 0) {
-        for (int i = k - 1; !finished && !changed; --i) {
+        for (i = k - 1; !finished && !changed; --i) {
             if (arr[i] < (n-1) - (k-1) + i) {
                 ++arr[i];
                 if (i < k - 1) {
-                    for (int j = i + 1; j < k; ++j) {
+                    for (j = i + 1; j < k; ++j) {
                         arr[j] = arr[j-1] + 1;
                     }
                 }
@@ -59,32 +61,7 @@ int kSubsetsItHelper(int * arr, int n, int k) {
             finished = i == 0;
         }
         if (!changed) {
-            for (int i = 0; i < k; ++i) {
-                arr[i] = i;
-            }
-        }
-    }
-    return changed;
-}
-
-int kSubsetsChrItHelper(char * arr, int n, int k) {
-    int finished = 0;
-    int changed = 0;
-    if (k > 0) {
-        for (int i = k - 1; !finished && !changed; --i) {
-            if (arr[i] < (n-1) - (k-1) + i) {
-                ++arr[i];
-                if (i < k - 1) {
-                    for (int j = i + 1; j < k; ++j) {
-                        arr[j] = arr[j-1] + 1;
-                    }
-                }
-                changed = 1;
-            }
-            finished = i == 0;
-        }
-        if (!changed) {
-            for (int i = 0; i < k; ++i) {
+            for (i = 0; i < k; ++i) {
                 arr[i] = i;
             }
         }
@@ -94,7 +71,8 @@ int kSubsetsChrItHelper(char * arr, int n, int k) {
 
 void kSubsetsIt(int k, void (*f) (int *, int *, int)) {
     int arr1[k], arr2[k];
-    for (int i = 0; i < k; ++i) arr1[i] = i, arr2[i] = i;
+    int i;
+    for (i = 0; i < k; ++i) arr1[i] = i, arr2[i] = i;
     do {
         do {
             f(arr1, arr2, k);
