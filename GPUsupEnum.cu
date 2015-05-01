@@ -9,7 +9,7 @@
 // #include "linalg.h"
 // #endif
 
-#define NTB 512
+// #define NTB 512
 #define MAXSIZE 20
 #define MAXMATSIZE 17
 #define MAXSUPPORTSIZE 16
@@ -22,6 +22,7 @@ __constant__ float d_payoffsA[400];
 __constant__ float d_payoffsB[400];
 __constant__ int d_nActions1;
 __constant__ int d_nActions2;
+__constant__ int NTB;
 
 float * payoffsA, * payoffsB;
 int nActions1, nActions2;
@@ -321,11 +322,13 @@ __device__ void printSolution(float * strat1, float * strat2, int n1, int n2) {
     printf("\n");
 }
 
+__device__ void doNothing() {
+    return;
+}
 
 __global__ void gpu_nashEq(int * supArray, int k) {
     int tid = threadIdx.x;
     int numSupports = comb(d_nActions1, k);
-    if (tid < numSupports) {
     extern __shared__ int p1Support[]; 
     // int * p1Support = supArray + (k * blockIdx.x);
     for (int i = 0; i < k; ++i) {
@@ -377,15 +380,14 @@ __global__ void gpu_nashEq(int * supArray, int k) {
                                 // printf
                                 //for (int i = 0; i < NTB; ++i) {
                                 //    if (i == tid) 
-                                        printSolution(strat1, strat2, d_nActions1, d_nActions2);
+                                    doNothing();
+                                        // printSolution(strat1, strat2, d_nActions1, d_nActions2);
                                 //}
                         }
                     }
                 }
             }
         }
-    }
-    __syncthreads();
     }
     // Assign associated segment of array with correct block
     // Allocate EXACTLY enough blocks, no need to turn off
@@ -396,12 +398,18 @@ __global__ void gpu_nashEq(int * supArray, int k) {
 int main(int argc, char * argv[]) {
     int devCount;
     cudaGetDeviceCount(&devCount);
-    printf("No. Devices: %d\n", devCount);
+    // printf("No. Devices: %d\n", devCount);
     if (argc < 2) {
         DIE("Incorrect command line args"); 
     } else {
         // Pull payoff info and action spaces of both players from file
         readGame(argv[1]);
+        int NTBs = 512;
+        if (argc == 3) {
+            NTBs = atoi(argv[2]);
+        }
+        cudaSafeCall(cudaMemcpyToSymbol(NTB, &NTBs, sizeof(int)));
+        // printf("Threads per block: %d\n", NTBs);
 
         initDeviceConstants();
 
@@ -412,13 +420,13 @@ int main(int argc, char * argv[]) {
         
         for (int i = 1; i <= nActions1; ++i) {
             double numBlocks = comb(nActions1, i);
-            printf("nB : %f\n", numBlocks);
+            // printf("nB : %f\n", numBlocks);
             kSubsetsPopulate(i);    // Send all subsets to device of size k
             /* Compute optimal number of blocks; I guess just the number
              * of combinations of a given size support? */
             // continue;
             
-            gpu_nashEq<<<numBlocks, NTB, i*(sizeof(int))>>>(d_supportArray, i); 
+            gpu_nashEq<<<numBlocks, NTBs, i*(sizeof(int))>>>(d_supportArray, i); 
         }
 
         cudaFree(d_supportArray);

@@ -1,0 +1,44 @@
+Fri May 1 01:22:57 EDT 2015: start benchmarking for GPUsupEnum using games in file testFiles.txt
+RandomGame10.game.easy:
+Trial 1: real 0m0.431s user 0m0.010s sys 0m0.080s
+Trial 2: real 0m0.136s user 0m0.015s sys 0m0.068s
+RandomGame11.game.easy:
+Trial 1: real 0m0.304s user 0m0.016s sys 0m0.081s
+Trial 2: real 0m0.149s user 0m0.026s sys 0m0.071s
+RandomGame12.game.easy:
+Trial 1: real 0m0.232s user 0m0.072s sys 0m0.091s
+Trial 2: real 0m0.218s user 0m0.068s sys 0m0.096s
+RandomGame13.game.easy:
+Trial 1: real 0m0.551s user 0m0.298s sys 0m0.176s
+Trial 2: real 0m0.528s user 0m0.288s sys 0m0.187s
+RandomGame14.game.easy:
+Trial 1: real 0m1.876s user 0m1.211s sys 0m0.611s
+Trial 2: real 0m1.876s user 0m1.244s sys 0m0.577s
+RandomGame15.game.easy:
+Trial 1: real 0m7.956s user 0m5.500s sys 0m2.397s
+Trial 2: real 0m7.958s user 0m5.715s sys 0m2.183s
+RandomGame16.game.easy:
+Trial 1: real 0m34.272s user 0m25.084s sys 0m9.081s
+Trial 2: real 0m34.242s user 0m24.501s sys 0m9.667s
+Fri May 1 01:25:31 EDT 2015: start benchmarking for GPUsupEnum using games in file testFiles.txt
+RandomGame10.game.easy:
+Trial 1: real 0m0.272s user 0m0.014s sys 0m0.075s
+Trial 2: real 0m0.132s user 0m0.013s sys 0m0.069s
+RandomGame11.game.easy:
+Trial 1: real 0m0.147s user 0m0.025s sys 0m0.072s
+Trial 2: real 0m0.147s user 0m0.020s sys 0m0.077s
+RandomGame12.game.easy:
+Trial 1: real 0m0.214s user 0m0.074s sys 0m0.090s
+Trial 2: real 0m0.212s user 0m0.067s sys 0m0.096s
+RandomGame13.game.easy:
+Trial 1: real 0m0.523s user 0m0.275s sys 0m0.196s
+Trial 2: real 0m0.521s user 0m0.297s sys 0m0.176s
+RandomGame14.game.easy:
+Trial 1: real 0m1.872s user 0m1.237s sys 0m0.584s
+Trial 2: real 0m1.871s user 0m1.243s sys 0m0.578s
+RandomGame15.game.easy:
+Trial 1: real 0m7.948s user 0m5.475s sys 0m2.418s
+Trial 2: real 0m7.951s user 0m5.586s sys 0m2.308s
+RandomGame16.game.easy:
+Trial 1: real 0m34.232s user 0m24.440s sys 0m9.723s
+Trial 2: real 0m34.237s user 0m24.345s sys 0m9.816s
