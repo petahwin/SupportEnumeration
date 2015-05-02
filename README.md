@@ -35,7 +35,9 @@ supEnum.py
 The usage of the codes is as follows:
 
 ./GPUsupEnum *.easy [optional posint arg]
+
 ./OMPsupEnum *.easy numThreads
+
 ./SerialsupEnum *.easy
 
 For the GPU code, the number of threads per block
@@ -79,7 +81,9 @@ RUN THE BENCHMARKING SCRIPTS ONLY AFTER SUCCESSFULLY
 CALLING MAKE TO BUILD THE CODES
 
 GPUbenchmark.sh writes to GPUdata.log
+
 OMPbenchmark.sh writes to OMPdata.log
+
 Serialbenchmark.sh writes to Serialdata.log
 
 The scripts will benchmark using the files specified
