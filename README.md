@@ -2,6 +2,8 @@
 Serial and Parallel implementation and benchmarking of Support 
 Enumeration Algorithm to solve Nash Equilibria
 
+Note: newest verions of code directory can be found at: https://github.com/peternguyen117/SupportEnumeration/
+
 # Building
 In order to build all codes, we need the following:
 
