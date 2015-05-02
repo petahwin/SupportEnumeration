@@ -93,3 +93,12 @@ in testFiles.txt; these local file names specified in
 testFiles.txt will be searched for in the games/
 subdirectory
 
+# Testing
+
+In order to test for correctness, all codes must be able to print the nash equilibria to stdout. In order to benchmark, all codes must NOT print nash equilibria to stdout.
+
+SerialsupEnum and OMPsupEnum currently have set the "printsolution" function on to print out all Nash equilibria to stdout; in order to stop this, merely comment out the line that calls "printsolution" in SerialsupEnum.c and OMPsupEnum.c.
+
+GPUsupEnum currently does not print Nash equilibria to stdout; to do so, uncomment the line that calls "printsolution" in GPUsupEnum.cu; WARNING: "printsolution" is NOT ATOMIC in GPUsupEnum
+
+
