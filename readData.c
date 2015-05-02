@@ -7,8 +7,8 @@ extern float * payoffsA, * payoffsB;
 
 /* Returns 0 on error, 1 on success */
 /* In param: game file */
-/* Out param: nothing for now */
-/* Side effects: prints out the information */
+/* Populates constant valued global variables
+ * including the payoff matrices and set of actions */
 int readGame(char * gameData) {
   FILE * fp;
   char line[60];

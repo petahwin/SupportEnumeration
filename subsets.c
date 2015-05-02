@@ -1,6 +1,8 @@
 #include <stdbool.h>
 
 extern int nActions1, nActions2;
+
+/* Deprecated recursive enumeration of supports of size k
 extern int * allActions1, * allActions2;
 
 void kSubsetsRecHelper(int k, int kCur, int * acc1, int * acc2, int index, 
@@ -42,6 +44,7 @@ void kSubsetsRec(int k, void (*f) (int *, int *, int)) {
     for (i = 0; i < k; ++i) {acc1[i] = 0; acc2[i] = 0;};
     kSubsetsRecHelper(k, k, acc1, acc2, 0, startProc, f);
 }
+*/
 
 int kSubsetsItHelper(int * arr, int n, int k) {
     int finished = 0;
@@ -69,6 +72,8 @@ int kSubsetsItHelper(int * arr, int n, int k) {
     return changed;
 }
 
+// Gets pairs of combinations of size k, based on set of actions
+// Applies the given functino to the support pair
 void kSubsetsIt(int k, void (*f) (int *, int *, int)) {
     int arr1[k], arr2[k];
     int i;

@@ -17,9 +17,9 @@
 
 int nActions1, nActions2;
 float * payoffsA, * payoffsB;
-int * allActions1, * allActions2;
 float * matA;
 
+// Takes only *.easy files
 int readGame(char * gameData);
 
 void kSubsetsRec(int k, void (*f) (int *, int *, int));
@@ -41,6 +41,7 @@ void doNothing(int * acc1, int * acc2, int k) {
     return;
 }
 
+// Builds matrices necessary for solving for indifference condition
 void buildMat(int * acc1, int * acc2, int suppSize, float * mat, bool isB) {
     // both payoffsA and payoffsB are col major
     int k = 0;
@@ -63,6 +64,7 @@ void buildMat(int * acc1, int * acc2, int suppSize, float * mat, bool isB) {
     }
 }
 
+// Builds full strategy vector from support vector
 void buildFullStrat(int * ac, float * stratWeights, int sizeSubSet,
                     int sizeStrat, float * strategy) 
 {
@@ -70,6 +72,7 @@ void buildFullStrat(int * ac, float * stratWeights, int sizeSubSet,
     for (int i = 0; i < sizeSubSet; ++i) strategy[ac[i]] = stratWeights[i];
 }
 
+// Determines if given supports may make up a Nash equilibrium
 void nashEq(int * acc1, int * acc2, int suppSize) {
     int matSize = suppSize+1;
     for (int i = 0, size = matSize * matSize; i < size; ++i) matA[i] = 0.;
@@ -167,6 +170,7 @@ void nashEq(int * acc1, int * acc2, int suppSize) {
         maxxB = MAX(xB[i], maxxB);
     }
 
+    // Check that supports are best responses
     for (int i = 0; i < suppSize; ++i) {
         if (Ay[acc1[i]] < (maxAy - fabs(maxAy / 1000.))) {
             // printf("Failed maxAy test: %.5f < %.5f\n", Ay[acc1[i]], maxAy);
@@ -193,11 +197,6 @@ int main(int argc, char * argv[]) {
         readGame(argv[1]);
         double wt1, wt2, ct1, ct2;
         timing(&wt1, &ct1);
-        // Init set of all actions
-        int allActs1[nActions1], allActs2[nActions2];
-        for (int i = 0; i < nActions1; ++i) allActs1[i] = i;
-        for (int i = 0; i < nActions2; ++i) allActs2[i] = i;
-        allActions1 = allActs1, allActions2 = allActs2;
 
         int maxSupport = MIN(nActions1, nActions2);
         matA = malloc((maxSupport + 1) * (maxSupport + 1) * sizeof(float));

@@ -52,7 +52,10 @@ void __cudaCheckError( const char *file, const int line ) {
     return;
 }
 //////////////////////////////////////////////////////////////////////
-
+// Computes LU decomposition, of fails if singular matrix
+// Matrix A is overwritten by LU decomposition
+// ipiv stores the pivot exchanges
+// n is the size of the side of the square matrix A
 __device__ int croutLU(float * A, int n, int * ipiv) {
     int argmaxi;
     float max, acc, temp;
@@ -107,6 +110,8 @@ __device__ int croutLU(float * A, int n, int * ipiv) {
     return 0;
 }
 
+// Using LU decomposed matrix A of size n, and vector b, solves
+// Ax = b and stores x in the array b
 __device__ void backsub(float * A, int n, int * ipiv, float * b) {
     int indexPiv, ii = 0;
     float acc;
@@ -129,6 +134,10 @@ __device__ void backsub(float * A, int n, int * ipiv, float * b) {
     }
 }
 
+// Driver for linear system solver; matrix A in col major order
+// size of matrix side n
+// vector b stores input vector and acts as out param for solution vector x
+// Returns 0 on success, 1 for failure
 __device__ int gesv(float * A, int n, float * b) {
     int info;
     int ipiv[MAXSIZE];
@@ -142,6 +151,12 @@ __device__ int gesv(float * A, int n, float * b) {
 }
 
 // M x k, and k x N
+// For matrix * vector multiply
+// Col major order matrix A
+// vector b
+// vecLen is length of vector b
+// m is number of rows of matrix A 
+// out vector c[m]
 __device__ void MatVecGemm(int m, int vecLen, float * A, float * b, float * c) {
     float dotProd;
     for (int i = 0; i < m; ++i) {
@@ -153,6 +168,12 @@ __device__ void MatVecGemm(int m, int vecLen, float * A, float * b, float * c) {
     }
 }
 
+// For vector * matrix multiply
+// Col major order matrix A
+// vector b
+// vecLen is length of vector b
+// n is number of cols of matrix A 
+// out vector c[n]
 __device__ void VecMatGemm(int vecLen, int n, float * b_t, float * A, float * c) {
     float dotProd;
     for (int j = 0; j < n; ++j) {
@@ -164,6 +185,7 @@ __device__ void VecMatGemm(int vecLen, int n, float * b_t, float * A, float * c)
     }
 }
 
+// Computes n choose k
 __host__ __device__ double comb(int n, int k) {
     double prod = 1.;
     for (int i = 0; i < k; ++i) prod *= (n - i)/(double)(k - i);
@@ -198,6 +220,8 @@ int kSubsetsItHelper(int * arr, int n, int k) {
     return changed;
 }
 
+// Enumerates all supports of a given size k; sends the array
+// of supports to GPU device
 void kSubsetsPopulate(int k) {
     int arr[k];
     for (int i = 0; i < k; ++i) arr[i] = i;
@@ -252,6 +276,9 @@ int readGame(char * gameData) {
 }
 
 // Max elmts found at center
+// Used to determine allocation size of support array
+// necessary to hold any number of supports, given size
+// of the number of actions
 int maxSupportElmts() {
     int max = 0;
     for (int i = nActions1 / 2; i <= nActions1; ++i) {
@@ -266,6 +293,7 @@ int maxSupportElmts() {
 
     return max + 1;
 }
+
 
 void initDeviceConstants() {
     // Load payoff matrices and constants to GPU
@@ -343,7 +371,7 @@ __global__ void gpu_nashEq(int * supArray, int k) {
     
     // Cycle as many times as it takes to perform one's work
     for (int i = 0; (i * NTB + tid) < numSupports; ++i) {
-        p2Support = supArray + i*NTB*k+tid*k;
+        p2Support = supArray + i*NTB*k+tid*k;       // Assign thread's player 2 support
 
         for (int j = 0; j < matSize; ++j) vecX[j] = 0., vecY[j] = 0.;
         
@@ -422,9 +450,6 @@ int main(int argc, char * argv[]) {
             double numBlocks = comb(nActions1, i);
             // printf("nB : %f\n", numBlocks);
             kSubsetsPopulate(i);    // Send all subsets to device of size k
-            /* Compute optimal number of blocks; I guess just the number
-             * of combinations of a given size support? */
-            // continue;
             
             gpu_nashEq<<<numBlocks, NTBs, i*(sizeof(int))>>>(d_supportArray, i); 
         }

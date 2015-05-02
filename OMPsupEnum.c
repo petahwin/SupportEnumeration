@@ -21,7 +21,6 @@ int threadCounter;
 #pragma omp threadprivate(threadCounter, tid)
 int nActions1, nActions2;
 float * payoffsA, * payoffsB;
-int * allActions1, * allActions2;
 
 int readGame(char * gameData);
 
@@ -31,11 +30,10 @@ void kSubsetsItOMP(int k, void (*f) (int *, int *, int)) {
     for (int i = 0; i < k; ++i) arr1[i] = i, arr2[i] = i;
     do {
         do {
-            if (threadCounter % numThreads == tid) {
-                f(arr1, arr2, k);
+            if (threadCounter % numThreads == tid) { // Processes the support pair
+                f(arr1, arr2, k);                    // only if it is thread's turn
                 threadCounter++;
             } else {
-                // printf("Thread %d skipping...\n", tid);
                 threadCounter++;
             }
         } while (kSubsetsItHelper(arr2, nActions2, k));
@@ -183,11 +181,6 @@ int main(int argc, char * argv[]) {
         numThreads = atoi(argv[2]); // Set Number of threads
         double wt1, wt2, ct1, ct2;
         timing(&wt1, &ct1);
-        // Init set of all actions
-        int allActs1[nActions1], allActs2[nActions2];
-        for (int i = 0; i < nActions1; ++i) allActs1[i] = i;
-        for (int i = 0; i < nActions2; ++i) allActs2[i] = i;
-        allActions1 = allActs1, allActions2 = allActs2;
 
         int maxSupport = MIN(nActions1, nActions2);
         omp_set_num_threads(numThreads);
